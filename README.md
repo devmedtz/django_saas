@@ -10,11 +10,13 @@ django-saas is a generic subscription billing system built for django projects. 
 
 ## Installation
 1. clone the repo
+   
    git clone git@github.com:devmedtz/django_saas.git
 
 2. Install the virtual env and activate
 
 3. Install the requirements packages
+   
    pip install -r requirements.txt
 
 4. create your feature branch eg. payment gateway branch
