@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="col-md-4 offset-md-4" style="padding-top: 150px; height: 100vh;">
+
+  <h3 class="text-success">Registration Complete.</h3>
+  <p><b>You can login now</b></p>
+  <a class="btn btn-danger btn-lg" role="button" href="{% url 'accounts:login' %}">Login</a>
+
+</div>
+{% endblock %}

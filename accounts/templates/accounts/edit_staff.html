@@ -1,0 +1,87 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Update Staff{% endblock %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      <a class="navbar-brand" href="#"> <i class="fa fa-briefcase"></i> Staff</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+
+          <a class="nav-item nav-link" href="{% url 'accounts:create-staff' %}">
+              <i class="fa fa-plus-circle"></i> Add New
+          </a>
+            <a class="nav-item nav-link" href="{% url 'accounts:home' %}">
+              <i class="fa fa-list"></i> View
+            </a>
+          <a class="nav-item nav-link" href="{% url 'accounts:delete-staff' pk=person.pk %}">
+              <i class="fa fa-trash"></i> Delete</a>
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Edit {{ person.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'accounts:update-staff' pk=person.pk %}" method="post">{% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-info btn-block">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">{{ person.name }} Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover table-striped table-responsive">
+                        <tbody>
+                            <tr><td>Name</td><td>{{ person.name }}</td></tr>
+                            <tr><td>Phone</td><td>{{ person.phone_number }}</td></tr>
+                            <tr><td>Email</td><td>{{ person.email }}</td></tr>
+                            <tr><td>Created</td><td>{{ person.date_joined|date:'d-m-Y H:i' }}</td></tr>
+                            <tr><td>Branch</td><td>{{ person.branch }}</td></tr>
+                        </tbody>
+                    </table>
+                    {% if request.user.is_superuser %}
+                        <a href="{% url 'accounts:set-permissions' pk=person.pk %}" class="btn btn-outline-info">
+                            Set Permissions
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <h5 class="">Update {{ person.get_short_name }}'s Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{% url 'accounts:update-password' pk=person.pk %}" method="post">{% csrf_token %}
+                                {{ password_form.as_p }}
+                                <button type="submit" class="btn btn-info btn-block">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <h5 class="">Profile Photo</h5>
+                        </div>
+                        <div class="card-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

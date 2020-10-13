@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      <a class="navbar-brand" href="#"> <i class="fa fa-briefcase"></i> Staff</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+
+          <a class="nav-item nav-link" href="{% url 'accounts:create-staff' %}">
+              <i class="fa fa-plus-circle"></i> Add New
+          </a>
+            <a class="nav-item nav-link" href="{% url 'accounts:home' %}">
+              <i class="fa fa-list"></i> View
+            </a>
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Delete Staff {{ customuser.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger">Proceed to delete {{ customuser.name }} ?</h5>
+                    <form action="{% url 'accounts:delete-staff' pk=customuser.pk %}" method="post">{% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-block">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">{{ customuser.name }} Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover table-striped table-responsive">
+                        <tbody>
+                            <tr><td>Name</td><td>{{ customuser.name }}</td></tr>
+                            <tr><td>Phone</td><td>{{ customuser.phone_number }}</td></tr>
+                            <tr><td>Email</td><td>{{ customuser.email }}</td></tr>
+                            <tr><td>Created</td><td>{{ customuser.date_joined|date:'d-m-Y H:i' }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}

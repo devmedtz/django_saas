@@ -1,0 +1,52 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Staff{% endblock title %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      <a class="navbar-brand" href="#">
+          <i class="fa fa-users"></i> Staff
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+          <a class="nav-item nav-link" href="{% url 'accounts:create-staff' %}">
+              <i class="fa fa-plus-circle"></i> Add New
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+
+    <div class="card ">
+        <div class="card-body">
+            {% if staff|length > 0 %}
+
+                <table class="table table-striped table-bordered table-hover table-condensed" id="myTable">
+                    <thead>
+                        <th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Branch</th>
+                    </thead>
+                    <tbody>
+                        {% for person in staff %}
+                            <tr>
+                                <td>{{ person.num }}.</td>
+                                <td>
+                                    <a href="{% url 'accounts:update-staff' pk=person.pk %}"> {{ person.name }}</a>
+                                </td>
+                                <td>{{ person.phone_number }}</td>
+                                <td>{{ person.email }}</td>
+                                <td>{{ person.branch }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info">No staff have been added yet</div>
+            {% endif %}
+        </div>
+    </div>
+
+
+{% endblock %}

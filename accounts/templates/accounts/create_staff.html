@@ -1,0 +1,72 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      <a class="navbar-brand" href="#">
+          <i class="fa fa-users"></i> Staff
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+          <a class="nav-item nav-link" href="{% url 'accounts:home' %}">
+              <i class="fa fa-list"></i> View</a>
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Add New Staff</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'accounts:create-staff' %}" method="post">{% csrf_token %}
+                        {{ form.as_p }}
+                        <span class="text-muted">Phone number will be used as default password</span>
+                        <button type="submit" class="btn btn-info btn-block mt-2">Save</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">10 Most Recent Staff</h5>
+                </div>
+                <div class="card-body">
+                    {% if staff|length > 0 %}
+                        <table class="table table-striped table-bordered table-hover table-condensed">
+                            <thead>
+                                <th>#</th><th>Name</th><th>Phone</th><th>Email</th>
+                            </thead>
+                            <tbody>
+                                {% for person in staff %}
+                                    <tr>
+                                        <td>{{ person.num }}.</td>
+                                        <td>
+                                            <a href="{% url 'accounts:update-staff' pk=person.pk %}"> {{ person.name }}</a>
+                                        </td>
+                                        <td>{{ person.phone_number }}</td>
+                                        <td>{{ person.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-info">No staff have been added yet</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
