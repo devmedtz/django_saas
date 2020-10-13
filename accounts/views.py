@@ -19,6 +19,7 @@ from django.contrib.auth import get_user_model
 from .tokens import account_activation_token
 from .forms import SignUpForm, CreateStaffForm, UpdateStaffForm
 from .models import Profile
+from membership.models import Business, BusinessTeamMember, Subscription
 
 
 User = get_user_model()
@@ -51,6 +52,16 @@ def signup(request):
         #create profile
         profile = Profile(user=user)
         profile.save()
+
+        #create business
+        business = Business(user=user)
+        business.save()
+
+        #create BusinessTeamMember
+        business_team = BusinessTeamMember.objects.get_or_create(business=business, user=user)
+        #business_team = BusinessTeamMember(user=user)
+        print('business_team:', business_team)
+        #business_team.save()
 
         # send confirmation email
         token = account_activation_token.make_token(user)

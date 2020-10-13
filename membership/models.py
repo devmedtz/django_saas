@@ -6,6 +6,7 @@ User = get_user_model()
 
 
 class Business(models.Model):
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     reference_no = models.CharField(max_length=150, blank=True, null=True) #payment gateway
