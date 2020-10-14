@@ -36,10 +36,10 @@ class Login(LoginView):
             return url
         elif self.request.user.is_admin:
             return reverse('/')
-        elif self.request.user.is_superuser:
-            return f'/admin/'
-        else:
+        elif self.request.user.is_manager or self.request.user.is_staff:
             return reverse('dashboard')
+        else:
+            return f'/admin/'
 
 
 def signup(request):
@@ -47,6 +47,7 @@ def signup(request):
     if form.is_valid():
         user = form.save()
         user_email = form.cleaned_data['email']
+        user.is_manager = True
         user.save()
 
         #create profile

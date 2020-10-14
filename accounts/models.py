@@ -14,8 +14,8 @@ class CustomUser(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
-    is_manager = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    is_manager = models.BooleanField(default=False)
+    is_team = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=False)
     created_by = models.CharField(max_length=100, blank=True, null=True)
@@ -26,15 +26,25 @@ class CustomUser(AbstractBaseUser):
     REQUIRED_FIELDS = ['name', 'phone']
 
 
-    def has_perms(self, perm, obj=None):
+    def has_perm(self, perm, obj=None):
 
-        if self.is_superuser or self.is_admin or self.is_manager:
-            return True
+        return True
+
+        # if self.is_superuser or self.is_admin or self.is_manager:
+        #     return True
 
     def has_module_perms(self, app_label):
 
-        if self.is_superuser or self.is_admin or self.is_manager:
-            return True
+        return True
+
+        # if self.is_superuser or self.is_admin or self.is_manager:
+        #     return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_superuser
 
     def __str__(self):
         return self.email
