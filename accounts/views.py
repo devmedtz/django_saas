@@ -19,6 +19,7 @@ from django.contrib.auth import get_user_model
 from .tokens import account_activation_token
 from .forms import SignUpForm, CreateStaffForm, UpdateStaffForm
 from .models import Profile
+from membership.models import Business, BusinessTeamMember, Subscription
 
 
 User = get_user_model()
@@ -35,10 +36,10 @@ class Login(LoginView):
             return url
         elif self.request.user.is_admin:
             return reverse('/')
-        elif self.request.user.is_superuser:
-            return f'/admin/'
-        else:
+        elif self.request.user.is_manager or self.request.user.is_staff:
             return reverse('dashboard')
+        else:
+            return f'/admin/'
 
 
 def signup(request):
@@ -46,11 +47,22 @@ def signup(request):
     if form.is_valid():
         user = form.save()
         user_email = form.cleaned_data['email']
+        user.is_manager = True
         user.save()
 
         #create profile
         profile = Profile(user=user)
         profile.save()
+
+        #create business
+        business = Business(user=user)
+        business.save()
+
+        #create BusinessTeamMember
+        business_team = BusinessTeamMember.objects.get_or_create(business=business, user=user)
+        #business_team = BusinessTeamMember(user=user)
+        print('business_team:', business_team)
+        #business_team.save()
 
         # send confirmation email
         token = account_activation_token.make_token(user)
