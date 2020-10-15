@@ -5,5 +5,5 @@ from .import views
 app_name = 'membership'
 
 urlpatterns = [
-    # path('', views.PricingPage.as_view(), name='membership')
+    path('', views.paymentView, name='payment')
 ]
