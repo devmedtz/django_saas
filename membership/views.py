@@ -1,10 +1,19 @@
+import datetime
+from django.utils import timezone
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView, ListView
 from django.contrib import messages
-from .models import Plan, Subscription
+from .models import Plan, Subscription, Business
 from .forms import PaymentForm
+
+#Vodacom mpesa intergrations
+from django.conf import settings
+from portalsdk import APIContext, APIMethodType, APIRequest 
+from time import sleep
+
+from datetime import datetime, timedelta, date
 
 
 def get_user_plan(request):
@@ -61,21 +70,133 @@ class PricingPage(ListView):
 def paymentView(request):
 
     selected_plan = get_selected_plan(request)
-
     plans = Plan.objects.get(name=selected_plan)
-
-
+    business = Business.objects.get(user=request.user)
+    reference_no = business.reference_no
+    print('reference_no:', reference_no)
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
-            form.save()
 
-            return HttpResponse('Payment successfully')
+            #Begin payment processing
+            public_key = settings.PUBLIC_KEY
+
+            # Create Context with API to request a Session ID
+            api_context = APIContext()
+
+            # Api key
+            api_context.api_key = settings.API_KEY
+
+            # Public key
+            api_context.public_key = public_key
+
+            # Use ssl/https
+            api_context.ssl = True
+
+            # Method type (can be GET/POST/PUT)
+            api_context.method_type = APIMethodType.GET
+
+            # API address
+            api_context.address = 'openapi.m-pesa.com'
+
+            # API Port
+            api_context.port = 443
+
+            # API Path
+            api_context.path = '/sandbox/ipg/v2/vodacomTZN/getSession/'
+
+            # Add/update headers
+            api_context.add_header('Origin', '*')
+
+            # Parameters can be added to the call as well that on POST will be in JSON format and on GET will be URL parameters
+            # api_context.add_parameter('key', 'value')
+
+            #Do the API call and put result in a response packet
+            api_request = APIRequest(api_context)
+
+            # Do the API call and put result in a response packet
+            result = None
+            try:
+                result = api_request.execute()
+            except Exception as e:
+                print('Call Failed: ' + e)
+
+            if result is None:
+                raise Exception('SessionKey call failed to get result. Please check.')
+
+            # Display results
+            print(result.status_code)
+            print(result.headers)
+            print(result.body)
+
+            # The above call issued a sessionID
+            api_context = APIContext()
+            api_context.api_key = result.body['output_SessionID']
+            api_context.public_key = public_key
+            api_context.ssl = True
+            api_context.method_type = APIMethodType.POST
+            api_context.address = 'openapi.m-pesa.com'
+            api_context.port = 443
+            api_context.path = '/sandbox/ipg/v2/vodacomTZN/c2bPayment/singleStage/'
+            api_context.add_header('Origin', '*')
+
+            #Input Variables
+            amount = plans.price
+            phone = request.POST.get('phone')
+            desc = plans.name
+
+            api_context.add_parameter('input_Amount', amount)
+            api_context.add_parameter('input_Country', 'TZN')
+            api_context.add_parameter('input_Currency', 'TZS')
+            api_context.add_parameter('input_CustomerMSISDN', '000000000001') #phone number from customer
+            api_context.add_parameter('input_ServiceProviderCode', '000000')
+            api_context.add_parameter('input_ThirdPartyConversationID', 'asv02e5958774f7ba228d83d0d689761')
+            api_context.add_parameter('input_TransactionReference', reference_no)
+            api_context.add_parameter('input_PurchasedItemsDesc', desc)
+
+            api_request = APIRequest(api_context)
+
+            sleep(30)
+
+            result = None
+
+            try:
+                result = api_request.execute()
+            except Exception as e:
+                print('Call Failed: ' + e)
+
+            if result is None:
+                raise Exception('API call failed to get result. Please check.')
+
+            print(result.status_code)
+            print(result.headers)
+            print(result.body)
+
+            if result.body['output_ResponseCode'] == 'INS-0':
+
+                ends_time = timezone.now() + timedelta(days=plans.duration_days)
+                Subscription.objects.filter(business=request.user.business).update(
+                    plan=plans.id,
+                    start_time = timezone.now(),
+                    ends_time = ends_time,
+                    paid_status = True,
+                    )
+                subscription = Subscription.objects.filter(business=request.user.business)
+
+                #save transactionID,transactionID
+                payment = form.save(commit=False)
+                payment.subscription = subscription
+                payment.transactionID = result.body['output_TransactionID']
+                payment.conversationID = result.body['output_ConversationID']
+                payment.save()
+
+                return HttpResponse('Your Payment was Successfully sent!') 
+
 
     else:
         form = PaymentForm()
-        context = {'form':form, 'plans':plans}
+    context = {'form':form, 'plans':plans}
 
     return render(request, 'membership/payment.html', context)
 
