@@ -1,3 +1,6 @@
+from datetime import datetime
+from django.utils import timezone
+from datetime import datetime, timedelta, date
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.core.mail import EmailMessage
@@ -19,7 +22,7 @@ from django.contrib.auth import get_user_model
 from .tokens import account_activation_token
 from .forms import SignUpForm, CreateStaffForm, UpdateStaffForm
 from .models import Profile
-from membership.models import Business, BusinessTeamMember, Subscription
+from membership.models import Business, BusinessTeamMember, Subscription, Plan
 
 
 User = get_user_model()
@@ -35,9 +38,9 @@ class Login(LoginView):
         if url:
             return url
         elif self.request.user.is_admin:
-            return reverse('/')
+            return reverse('membership')
         elif self.request.user.is_manager or self.request.user.is_staff:
-            return reverse('dashboard')
+            return reverse('membership')
         else:
             return f'/admin/'
 
@@ -60,9 +63,17 @@ def signup(request):
 
         #create BusinessTeamMember
         business_team = BusinessTeamMember.objects.get_or_create(business=business, user=user)
-        #business_team = BusinessTeamMember(user=user)
-        print('business_team:', business_team)
-        #business_team.save()
+
+        #create free subscription
+        ends_time = timezone.now() + timedelta(days=14)
+
+        subscription = Subscription.objects.get_or_create(
+            plan_id= 1,
+            business=business,
+            start_time = timezone.now(),
+            ends_time = ends_time,
+            is_active = True,
+            )
 
         # send confirmation email
         token = account_activation_token.make_token(user)
