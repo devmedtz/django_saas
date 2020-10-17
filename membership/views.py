@@ -1,12 +1,14 @@
-import datetime
+from datetime import datetime
 from django.utils import timezone
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, ListView
 from django.contrib import messages
 from .models import Plan, Subscription, Business
 from .forms import PaymentForm
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 
 #Vodacom mpesa intergrations
 from django.conf import settings
@@ -34,7 +36,7 @@ def get_selected_plan(request):
     return None
 
 
-class PricingPage(ListView):
+class PricingPage(LoginRequiredMixin, ListView):
     template_name = 'membership/pricing_page.html'
     model = Plan
 
@@ -66,14 +68,20 @@ class PricingPage(ListView):
 
         return HttpResponseRedirect(reverse('membership:payment'))  
 
-
+@login_required
 def paymentView(request):
 
     selected_plan = get_selected_plan(request)
     plans = Plan.objects.get(name=selected_plan)
+
     business = Business.objects.get(user=request.user)
-    reference_no = business.reference_no
+
+    current_subscription = get_user_plan(request)
+
+    reference_no = str(request.user.id) + str(current_subscription.id) + datetime.now().strftime('%Y%m%d%H%M%S')
+
     print('reference_no:', reference_no)
+
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -174,7 +182,8 @@ def paymentView(request):
             print(result.body)
 
             if result.body['output_ResponseCode'] == 'INS-0':
-
+                
+                #update/downgrade subscriptions
                 ends_time = timezone.now() + timedelta(days=plans.duration_days)
                 Subscription.objects.filter(business=request.user.business).update(
                     plan=plans.id,
@@ -182,21 +191,38 @@ def paymentView(request):
                     ends_time = ends_time,
                     paid_status = True,
                     )
-                subscription = Subscription.objects.filter(business=request.user.business)
 
                 #save transactionID,transactionID
                 payment = form.save(commit=False)
-                payment.subscription = subscription
+                payment.user_id = request.user.id
                 payment.transactionID = result.body['output_TransactionID']
                 payment.conversationID = result.body['output_ConversationID']
+                payment.reference_no = reference_no
                 payment.save()
 
                 return HttpResponse('Your Payment was Successfully sent!') 
 
+            elif result.body['output_ResponseCode'] == 'INS-1':
+                messages.add_message(request, messages.ERROR, 'Internal Error')
+
+            elif result.body['output_ResponseCode'] == 'INS-6':
+                messages.add_message(request, messages.ERROR, 'Transaction Failed')
+
+            elif result.body['output_ResponseCode'] == 'INS-9':
+                messages.add_message(request, messages.ERROR, 'Request timeout')
+
+            elif result.body['output_ResponseCode'] == 'INS-10':
+                messages.add_message(request, messages.ERROR, 'Duplicate Transaction')
+
+            elif result.body['output_ResponseCode'] == 'INS-2006':
+                messages.add_message(request, messages.ERROR, 'Insufficient balance')
+
+            else:
+                messages.add_message(request, messages.ERROR, 'Configuration Error, contact with support team')
 
     else:
         form = PaymentForm()
-    context = {'form':form, 'plans':plans}
+    context = {'form':form, 'plans':plans, 'reference_no':reference_no}
 
     return render(request, 'membership/payment.html', context)
 
