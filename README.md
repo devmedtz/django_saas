@@ -21,15 +21,27 @@ django-saas is a generic subscription billing system built for django projects. 
    env/scripts/activate
    ```
 
-
-
 - Install the required packages
 
    ```pip install -r requirements.txt```
 
-- Create your branch
+-  Create and apply migrations
+
+   ```python manage.py makemigrations```
+
+   ```python manage.py migrate```
+
+- rename ```.env-sample``` to ```.env``` and fill accordingly.
+
+- Create superuser
+
+   ```python manage.py createsuperuser```
+
+- Run development server
+
+   ```python manage.py runserver```
+
+
+### Contributions are warmly welcomed.
 
 - Start contributing following the [contributing guide](CONTRIBUTING.md)
-
-
-Contributions are warmly welcomed.
