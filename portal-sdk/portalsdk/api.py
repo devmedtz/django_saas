@@ -39,25 +39,36 @@ class APIRequest:
         return encrypted_msg
 
     def create_default_headers(self):
-        self.context.add_header('Authorization', 'Bearer {}'.format(self.create_bearer_token().decode('utf-8')))
+        self.context.add_header(
+            'Authorization',
+            'Bearer {}'.format(self.create_bearer_token().decode('utf-8')))
         self.context.add_header('Content-Type', 'application/json')
         self.context.add_header('Host', self.context.address)
 
     def __get(self):
-        r = requests.get(self.context.get_url(), params=self.context.get_parameters(), headers=self.context.get_headers())
+        r = requests.get(
+            self.context.get_url(),
+            params=self.context.get_parameters(),
+            headers=self.context.get_headers())
         print(r)
-        return APIResponse(r.status_code, json.loads(r.headers.__str__().replace("'", '"')), json.loads(r.text))
+        return APIResponse(r.status_code,
+                           json.loads(r.headers.__str__().replace("'", '"')),
+                           json.loads(r.text))
 
     def __post(self):
         r = requests.post(self.context.get_url(), headers=self.context.get_headers(), json=self.context.get_parameters())
         print(r)
-        return APIResponse(r.status_code, json.loads(r.headers.__str__().replace("'", '"')), json.loads(r.text))
+        return APIResponse(r.status_code,
+                           json.loads(r.headers.__str__().replace("'", '"')),
+                           json.loads(r.text))
 
     def __put(self):
         print('PUT')
         r = requests.put(self.context.get_url(), headers=self.context.get_headers(), json=self.context.get_parameters())
         print('PUT', r)
-        return APIResponse(r.status_code, json.loads(r.headers.__str__().replace("'", '"')), json.loads(r.text))
+        return APIResponse(r.status_code,
+                           json.loads(r.headers.__str__().replace("'", '"')),
+                           json.loads(r.text))
 
     def __unknown(self):
         raise Exception('Unknown Method')
@@ -65,11 +76,11 @@ class APIRequest:
 
 class APIResponse(dict):
 
-    def __init__(self, status_code, headers, body):
+    def __init__(self, status_code: str, headers: dict, body: dict):
         super(APIResponse, self).__init__()
-        self['status_code']: str = status_code
-        self['headers']: dict = headers
-        self['body']: dict = body
+        self['status_code'] = status_code
+        self['headers'] = headers
+        self['body'] = body
 
     @property
     def status_code(self) -> int:
@@ -114,18 +125,21 @@ class APIMethodType(Enum):
 
 class APIContext(dict):
 
-    def __init__(self, api_key='', public_key='', ssl=False, method_type=APIMethodType.GET, address='', port=80, path='', headers={}, parameters={}):
+    def __init__(self, api_key: str = '', public_key: str = '',
+                 ssl: bool = False, method_type:Enum=APIMethodType.GET,
+                 address: str='', port: int=80, path: str='', headers: dict={},
+                 parameters: dict={}):
         super(APIContext, self).__init__()
 
-        self['api_key']: str = api_key
-        self['public_key']: str = public_key
-        self['ssl']: bool = ssl
-        self['method_type']: Enum = method_type
-        self['address']: str = address
-        self['port']: int = port
-        self['path']: str = path
-        self['headers']: dict = headers
-        self['parameters']: dict = parameters
+        self['api_key'] = api_key
+        self['public_key'] = public_key
+        self['ssl'] = ssl
+        self['method_type'] = method_type
+        self['address'] = address
+        self['port'] = port
+        self['path'] = path
+        self['headers'] = headers
+        self['parameters'] = parameters
 
     def get_url(self):
         if self.ssl is True:
