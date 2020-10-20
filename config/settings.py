@@ -1,6 +1,6 @@
 import os
+
 from decouple import config
-from unipath import Path
 from dj_database_url import parse as db_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -11,17 +11,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
 if not DEBUG:
     ALLOWED_HOSTS = []
-    SECURE_SSL_REDIRECT=True
-    SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_COOKIE_SECURE=True
-    SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 else:
     ALLOWED_HOST = []
 
@@ -135,7 +135,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-#Email Configurations
+# Email Configurations
 if not DEBUG:
     EMAIL_BACKEND = config('EMAIL_BACKEND')
     EMAIL_HOST = config('EMAIL_HOST')
@@ -164,16 +164,16 @@ MEDIA_URL = '/media/'
 
 if not DEBUG:
     STATICFILES_DIRS = [
-        BASE_DIR+"/static",]
+        BASE_DIR+"/static", ]
 
     MEDIA_ROOT = ''
     STATIC_ROOT = ''
 else:
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-#M-PESA PAYMENT CONFIGURATIONS
+# M-PESA PAYMENT CONFIGURATIONS
 if not DEBUG:
     PUBLIC_KEY = config('PUBLIC_KEY')
     API_KEY = config('API_KEY')

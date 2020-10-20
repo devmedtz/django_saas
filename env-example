@@ -1,6 +1,6 @@
 DEBUG=True
 
-SECRET_KEY=aaaaa
+DJANGO_SECRET_KEY=aaaaa
 
 PUBLIC_KEY=
 
