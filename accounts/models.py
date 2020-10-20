@@ -1,16 +1,18 @@
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-
+from django.urls import reverse
 
 from .managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser):
     name = models.CharField(verbose_name='Full Name', max_length=100)
-    email = models.EmailField(verbose_name='Email Address', unique=True, max_length=100)
-    phone = models.CharField(max_length=50, unique=True, verbose_name='Phone Number')
-    
+    email = models.EmailField(
+        verbose_name='Email Address', unique=True, max_length=100)
+    phone = models.CharField(max_length=50, unique=True,
+                             verbose_name='Phone Number')
+
     is_superuser = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
@@ -24,7 +26,6 @@ class CustomUser(AbstractBaseUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'phone']
-
 
     def has_perm(self, perm, obj=None):
 
@@ -58,8 +59,11 @@ def profile_pic_filename(instance, filename):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(CustomUser, primary_key=True, on_delete=models.CASCADE)
-    profile_pic = models.ImageField(verbose_name='Profile Picture', default='profile_pics/user.svg', upload_to=profile_pic_filename)
+    user = models.OneToOneField(
+        CustomUser, primary_key=True, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(verbose_name='Profile Picture',
+                                    default='profile_pics/user.svg',
+                                    upload_to=profile_pic_filename)
 
     def get_absolute_url(self):
         return reverse('accounts:profile', kwargs={'pk': self.user_id})

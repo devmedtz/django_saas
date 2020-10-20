@@ -1,17 +1,20 @@
 from django import forms
-from .models import CustomUser
+
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# todo: #26 add forms for adding and updating user
+
 
 class SignUpForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    password2 = forms.CharField(
+        label='Password confirmation', widget=forms.PasswordInput)
 
-    class Meta: 
+    class Meta:
         model = User
-        fields = ['name','email','phone']
+        fields = ['name', 'email', 'phone']
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -34,10 +37,11 @@ class CreateStaffForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['name','email','phone','is_active']
+        fields = ['name', 'email', 'phone', 'is_active']
+
 
 class UpdateStaffForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['name','email','phone','is_active']
+        fields = ['name', 'email', 'phone', 'is_active']
