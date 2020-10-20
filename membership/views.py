@@ -12,8 +12,6 @@ from django.contrib.auth.decorators import login_required
 
 # Vodacom mpesa intergrations
 from django.conf import settings
-# todo: #19 update path to portalsdk module
-# update guide on how to install and import portalsdk
 from portalsdk import APIContext, APIMethodType, APIRequest
 from time import sleep
 
