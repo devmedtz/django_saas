@@ -20,20 +20,28 @@ from datetime import datetime, timedelta, date
 
 def get_user_plan(request):
     user_plan_qs = Subscription.objects.filter(business=request.user.business)
-    print('user_plan_qs:', user_plan_qs)
     if user_plan_qs.exists():
         return user_plan_qs.first()
     return None
 
 
 def get_selected_plan(request):
-    plan_type = request.session['selected_plan_type']
-    print('plan_type:', plan_type)
+    #plan_type = request.session['selected_plan_type']
+
+    plan_type = request.session.get('selected_plan_type')
+    host = request.get_host()
+
+
+    print(request.session.get('selected_plan_type'))
+    
     selected_plan_qs = Plan.objects.filter(
             name=plan_type)
     if selected_plan_qs.exists():
         return selected_plan_qs.first()
-    return None
+
+    return HttpResponse('Session expire')
+
+    
 
 
 class PricingPage(LoginRequiredMixin, ListView):
@@ -65,6 +73,7 @@ class PricingPage(LoginRequiredMixin, ListView):
 
         #ASIGN TO SESSION
         request.session['selected_plan_type'] = selected_plan.name
+
 
         return HttpResponseRedirect(reverse('membership:payment'))  
 
