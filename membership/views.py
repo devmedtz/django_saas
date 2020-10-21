@@ -10,9 +10,9 @@ from .forms import PaymentForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 
-#Vodacom mpesa intergrations
+# Vodacom mpesa intergrations
 from django.conf import settings
-from portalsdk import APIContext, APIMethodType, APIRequest 
+from portalsdk import APIContext, APIMethodType, APIRequest
 from time import sleep
 
 from datetime import datetime, timedelta, date
@@ -35,7 +35,7 @@ def get_selected_plan(request):
     print(request.session.get('selected_plan_type'))
     
     selected_plan_qs = Plan.objects.filter(
-            name=plan_type)
+        name=plan_type)
     if selected_plan_qs.exists():
         return selected_plan_qs.first()
 
@@ -56,7 +56,7 @@ class PricingPage(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         selected_plan_type = request.POST.get('plan_id')
-        
+
         user_subscription = get_user_plan(request)
 
         selected_plan_qs = Plan.objects.filter(
@@ -65,17 +65,16 @@ class PricingPage(LoginRequiredMixin, ListView):
         if selected_plan_qs.exists():
             selected_plan = selected_plan_qs.first()
 
-        #VALIDATION
+        # VALIDATION
         if user_subscription.plan == selected_plan:
             if user_subscription != None:
                 messages.info(request, "Your have already this plan")
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-        #ASIGN TO SESSION
+        # ASIGN TO SESSION
         request.session['selected_plan_type'] = selected_plan.name
 
-
-        return HttpResponseRedirect(reverse('membership:payment'))  
+        return HttpResponseRedirect(reverse('membership:payment'))
 
 @login_required
 def paymentView(request):
@@ -87,16 +86,16 @@ def paymentView(request):
 
     current_subscription = get_user_plan(request)
 
-    reference_no = str(request.user.id) + str(current_subscription.id) + datetime.now().strftime('%Y%m%d%H%M%S')
+    reference_no = str(request.user.id) + str(current_subscription.id) + \
+        datetime.now().strftime('%Y%m%d%H%M%S')
 
     print('reference_no:', reference_no)
-
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
 
-            #Begin payment processing
+            # Begin payment processing
             public_key = settings.PUBLIC_KEY
 
             # Create Context with API to request a Session ID
@@ -129,7 +128,7 @@ def paymentView(request):
             # Parameters can be added to the call as well that on POST will be in JSON format and on GET will be URL parameters
             # api_context.add_parameter('key', 'value')
 
-            #Do the API call and put result in a response packet
+            # Do the API call and put result in a response packet
             api_request = APIRequest(api_context)
 
             # Do the API call and put result in a response packet
@@ -140,12 +139,8 @@ def paymentView(request):
                 print('Call Failed: ' + e)
 
             if result is None:
-                raise Exception('SessionKey call failed to get result. Please check.')
-
-            # Display results
-            print(result.status_code)
-            print(result.headers)
-            print(result.body)
+                raise Exception(
+                    'SessionKey call failed to get result. Please check.')
 
             # The above call issued a sessionID
             api_context = APIContext()
@@ -158,7 +153,7 @@ def paymentView(request):
             api_context.path = '/sandbox/ipg/v2/vodacomTZN/c2bPayment/singleStage/'
             api_context.add_header('Origin', '*')
 
-            #Input Variables
+            # Input Variables
             amount = plans.price
             phone = request.POST.get('phone')
             desc = plans.name
@@ -166,10 +161,13 @@ def paymentView(request):
             api_context.add_parameter('input_Amount', amount)
             api_context.add_parameter('input_Country', 'TZN')
             api_context.add_parameter('input_Currency', 'TZS')
-            api_context.add_parameter('input_CustomerMSISDN', '000000000001') #phone number from customer
+            # phone number from customer
+            api_context.add_parameter('input_CustomerMSISDN', '000000000001')
             api_context.add_parameter('input_ServiceProviderCode', '000000')
-            api_context.add_parameter('input_ThirdPartyConversationID', 'asv02e5958774f7ba228d83d0d689761')
-            api_context.add_parameter('input_TransactionReference', reference_no)
+            api_context.add_parameter(
+                'input_ThirdPartyConversationID', 'asv02e5958774f7ba228d83d0d689761')
+            api_context.add_parameter(
+                'input_TransactionReference', reference_no)
             api_context.add_parameter('input_PurchasedItemsDesc', desc)
 
             api_request = APIRequest(api_context)
@@ -186,22 +184,19 @@ def paymentView(request):
             if result is None:
                 raise Exception('API call failed to get result. Please check.')
 
-            print(result.status_code)
-            print(result.headers)
-            print(result.body)
 
             if result.body['output_ResponseCode'] == 'INS-0':
-                
-                #update/downgrade subscriptions
+
+                # update/downgrade subscriptions
                 ends_time = timezone.now() + timedelta(days=plans.duration_days)
                 Subscription.objects.filter(business=request.user.business).update(
                     plan=plans.id,
-                    start_time = timezone.now(),
-                    ends_time = ends_time,
-                    paid_status = True,
-                    )
+                    start_time=timezone.now(),
+                    ends_time=ends_time,
+                    paid_status=True,
+                )
 
-                #save transactionID,transactionID
+                # save transactionID,transactionID
                 payment = form.save(commit=False)
                 payment.user_id = request.user.id
                 payment.transactionID = result.body['output_TransactionID']
@@ -209,32 +204,34 @@ def paymentView(request):
                 payment.reference_no = reference_no
                 payment.save()
 
-                return HttpResponse('Your Payment was Successfully sent!') 
+                return HttpResponse('Your Payment was Successfully sent!')
 
             elif result.body['output_ResponseCode'] == 'INS-1':
                 messages.add_message(request, messages.ERROR, 'Internal Error')
 
             elif result.body['output_ResponseCode'] == 'INS-6':
-                messages.add_message(request, messages.ERROR, 'Transaction Failed')
+                messages.add_message(
+                    request, messages.ERROR, 'Transaction Failed')
 
             elif result.body['output_ResponseCode'] == 'INS-9':
-                messages.add_message(request, messages.ERROR, 'Request timeout')
+                messages.add_message(
+                    request, messages.ERROR, 'Request timeout')
 
             elif result.body['output_ResponseCode'] == 'INS-10':
-                messages.add_message(request, messages.ERROR, 'Duplicate Transaction')
+                messages.add_message(
+                    request, messages.ERROR, 'Duplicate Transaction')
 
             elif result.body['output_ResponseCode'] == 'INS-2006':
-                messages.add_message(request, messages.ERROR, 'Insufficient balance')
+                messages.add_message(
+                    request, messages.ERROR, 'Insufficient balance')
 
             else:
-                messages.add_message(request, messages.ERROR, 'Configuration Error, contact with support team')
+                messages.add_message(
+                    request, messages.ERROR,
+                    'Configuration Error, contact with support team')
 
     else:
         form = PaymentForm()
-    context = {'form':form, 'plans':plans, 'reference_no':reference_no}
+    context = {'form': form, 'plans': plans, 'reference_no': reference_no}
 
     return render(request, 'membership/payment.html', context)
-
-
-
-    

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-
 User = get_user_model()
 
 
@@ -63,5 +62,3 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.user.business.plan
-
-
