@@ -1,4 +1,15 @@
-Django==3.0.7
+Django==3.1
 django-crispy-forms==1.9.2
 six==1.15.0
 Pillow==7.2.0
+django-widget-tweaks==1.4.8
+certifi==2018.1.18
+chardet==3.0.4
+idna==2.6
+pycryptodome==3.9.8
+requests>=2.20.0
+urllib3==1.25.10
+django-decouple==2.1
+unipath==1.1
+dj-database-url==0.5.0
+./portal-sdk/

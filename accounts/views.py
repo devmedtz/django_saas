@@ -1,3 +1,6 @@
+from datetime import datetime
+from django.utils import timezone
+from datetime import datetime, timedelta, date
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.core.mail import EmailMessage
@@ -19,6 +22,7 @@ from django.contrib.auth import get_user_model
 from .tokens import account_activation_token
 from .forms import SignUpForm, CreateStaffForm, UpdateStaffForm
 from .models import Profile
+from membership.models import Business, BusinessTeamMember, Subscription, Plan
 
 
 User = get_user_model()
@@ -34,11 +38,11 @@ class Login(LoginView):
         if url:
             return url
         elif self.request.user.is_admin:
-            return reverse('/')
-        elif self.request.user.is_superuser:
-            return f'/admin/'
+            return reverse('membership')
+        elif self.request.user.is_manager or self.request.user.is_staff:
+            return reverse('membership')
         else:
-            return reverse('dashboard')
+            return f'/admin/'
 
 
 def signup(request):
@@ -46,25 +50,49 @@ def signup(request):
     if form.is_valid():
         user = form.save()
         user_email = form.cleaned_data['email']
+        user.is_manager = True
         user.save()
 
-        #create profile
+        # create profile
         profile = Profile(user=user)
         profile.save()
 
+        # create business
+        business = Business(user=user)
+        business.save()
+
+        # Create Plan
+        plan = Plan(name="testplan", description="test_description",duration_days=10,price=500.00,max_staff=10,max_branch=4)
+        plan.save()
+        # create BusinessTeamMember
+        business_team = BusinessTeamMember.objects.get_or_create(
+            business=business, user=user)
+
+        # create free subscription
+        ends_time = timezone.now() + timedelta(days=14)
+
+        subscription = Subscription.objects.get_or_create(
+            plan=plan,
+            business=business,
+            start_time=timezone.now(),
+            ends_time=ends_time,
+            is_active=True,
+        )
+        # import pdb
+        # pdb.set_trace()
         # send confirmation email
         token = account_activation_token.make_token(user)
         user_id = urlsafe_base64_encode(force_bytes(user.id))
         url = BASE_URL + reverse('accounts:confirm-email',
-                                  kwargs={'user_id': user_id, 'token': token})
+                                 kwargs={'user_id': user_id, 'token': token})
         message = get_template(
-             'accounts/account_activation_email.html').render(
-                 {'confirm_url': url})
+            'accounts/account_activation_email.html').render(
+            {'confirm_url': url})
         mail = EmailMessage(
-             'Account Confirmation',
-             message,
-             to=[user_email],
-             from_email=settings.EMAIL_HOST_USER)
+            'Account Confirmation',
+            message,
+            to=[user_email],
+            from_email=settings.EMAIL_HOST_USER)
         mail.content_subtype = 'html'
         mail.send()
 
@@ -76,7 +104,6 @@ def signup(request):
     return render(request, 'accounts/signup.html', {
         'form': form,
     })
-
 
 
 class ConfirmRegistrationView(TemplateView):
@@ -101,10 +128,11 @@ class ConfirmRegistrationView(TemplateView):
 class CreateStaff(FormView):
     template_name = 'accounts/create_staff.html'
     form_class = CreateStaffForm
- 
+
     def get(self, request, *args, **kwargs):
 
-        staffs = User.objects.filter(is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
+        staffs = User.objects.filter(
+            is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
 
         context = {
             'form': self.form_class,
@@ -125,28 +153,30 @@ class CreateStaff(FormView):
             staff_obj.created_by = self.request.user
 
             # Set default password to phone_number
+            # todo: #23 generate random characters
             staff_obj.set_password(
                 raw_password=form.cleaned_data['phone']
             )
 
             staff_obj.save()
 
-
-            messages.success(request, 'Success, staff created', extra_tags='alert alert-success')
+            messages.success(request, 'Success, staff created',
+                             extra_tags='alert alert-success')
 
             return redirect(to='accounts:home')
 
-        staffs = User.objects.filter(is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
+        staffs = User.objects.filter(
+            is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
 
         context = {
             'form': form,
             'staffs': staffs
         }
 
-        messages.error(request, 'Errors occurred', extra_tags='alert alert-danger')
+        messages.error(request, 'Errors occurred',
+                       extra_tags='alert alert-danger')
 
         return render(request, self.template_name, context=context)
-
 
 
 class UpdateStaff(FormView):
@@ -164,7 +194,8 @@ class UpdateStaff(FormView):
 
             form.save()
 
-            messages.success(request, 'Success, staff details updated', extra_tags='alert alert-success')
+            messages.success(
+                request, 'Success, staff details updated', extra_tags='alert alert-success')
 
             return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
         else:
@@ -175,7 +206,8 @@ class UpdateStaff(FormView):
                 'password_form': self.password_form
             }
 
-            messages.error(request, 'Failed, errors occurred.', extra_tags='alert alert-danger')
+            messages.error(request, 'Failed, errors occurred.',
+                           extra_tags='alert alert-danger')
 
             return render(request, self.template_name, context=context)
 
@@ -185,7 +217,8 @@ class UpdateStaff(FormView):
 
         password_form = self.password_form(user=person)
 
-        password_form.fields['old_password'].widget.attrs.pop("autofocus", None)
+        password_form.fields['old_password'].widget.attrs.pop(
+            "autofocus", None)
 
         context = {
             'form': self.form_class(instance=person),
@@ -196,14 +229,14 @@ class UpdateStaff(FormView):
         return render(request, self.template_name, context=context)
 
 
-
 class DeleteStaff(DeleteView):
 
     model = User
 
     def get_success_url(self):
 
-        messages.success(self.request, 'Success, staff deleted', extra_tags='alert alert-info')
+        messages.success(self.request, 'Success, staff deleted',
+                         extra_tags='alert alert-info')
 
         return reverse_lazy('accounts:home')
 
@@ -221,9 +254,11 @@ class UpdatePassword(FormView):
 
             form.save()
 
-            messages.success(request, 'Success, password updated', extra_tags='alert alert-success')
+            messages.success(request, 'Success, password updated',
+                             extra_tags='alert alert-success')
         else:
-            messages.error(request, 'Failed, password NOT updated', extra_tags='alert alert-danger')
+            messages.error(request, 'Failed, password NOT updated',
+                           extra_tags='alert alert-danger')
 
         return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
 
@@ -237,4 +272,3 @@ class Logout(FormView):
         logout(request)
 
         return redirect(to='accounts:login')
-

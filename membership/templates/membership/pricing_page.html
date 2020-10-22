@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+  <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h3 class="display-5">Pricing</h3>
+  </div>
+  
+<div class="container">
+    <div class="card-deck mb-3 text-center">
+        {% for plan in object_list %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h4 class="my-0 font-weight-normal">{{plan.name}}</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title pricing-card-title">Tshs. {{plan.price}} <small class="text-muted">/ mo</small></h5>
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li>3 users included</li>
+                    <li>3 Branch/store</li>
+                    <li>Free support</li>
+                    <li>Centre manager</li>
+                </ul>
+                {% if plan.name == 'Free' %}
+                    {% if plan.name != current_plan %}
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-lg btn-block btn-outline-primary">Sign up for free</a>
+                    {% else %}
+                    <small class="text-danger">This is your current plan</small>
+                    {% endif %}
+                {% else %}
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    {% if plan.name != current_plan %}
+                    <button class="btn btn-lg btn-block btn-primary">Get started</button>
+                    {% else %}
+                    <small class="text-danger">This is your current plan</small>
+                    {% endif %}
+                    <input type="hidden" name="plan_id" value="{{plan.id}}">
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

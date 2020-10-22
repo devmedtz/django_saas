@@ -9,19 +9,39 @@ django-saas is a generic subscription billing system built for django projects. 
 5. Payment gateway should be MPESA, by mpesa open api
 
 ## Installation
-1. clone the repo
-   
-   git clone git@github.com:devmedtz/django_saas.git
+- Clone the repo
 
-2. Install the virtual env and activate
+   ```git clone git@github.com:devmedtz/django_saas.git```
 
-3. Install the requirements packages
-   
-   pip install -r requirements.txt
+- Create virtual environment and activate it.
 
-4. create your feature branch eg. payment gateway branch
+   ```
+   virtualenv env
 
-5. Start contribution then push on your branch
+   env/scripts/activate
+   ```
+
+- Install the required packages
+
+   ```pip install -r requirements.txt```
+
+-  Create and apply migrations
+
+   ```python manage.py makemigrations```
+
+   ```python manage.py migrate```
+
+- rename ```.env-sample``` to ```.env``` and fill accordingly.
+
+- Create superuser
+
+   ```python manage.py createsuperuser```
+
+- Run development server
+
+   ```python manage.py runserver```
 
 
-------your welcome for Contribution --------
+### Contributions are warmly welcomed.
+
+- Start contributing following the [contributing guide](CONTRIBUTING.md)

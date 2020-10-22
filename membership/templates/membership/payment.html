@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <p class="alert alert-warning" >
+                        {{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <form action="." method="POST" autocomplete="off">
+                        {% csrf_token %}
+        
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+        
+                        {% for field in form.visible_fields %}
+                        <div class="form-group">
+                          <label class="mb-2" for="{{ field.id_for_label }}"><h5>{{ field.label }}</h5></label>
+                          {{form.phone|add_class:'form-control'|attr:'placeholder:Phone (eg. 255700000000)'}}
+                          {% for error in field.errors %}
+                            <small class="help-block text-danger">{{ error }}</small>
+                          {% endfor %}
+                        </div>
+                      {% endfor %}
+                    
+                        <div class="mb-3 mt-3 form-group">
+                            <button class="btn btn-danger btn-block btn-lg" id="make-payment">Pay Tshs. {{plans.price|floatformat:2}}/=</button>
+                            <p class="mb-2 mt-2 text-secondary">Ref no: {{reference_no}}</p>
+                        </div>
+                        <div class="mb-2">
+                            <small>Please keep your phone in hand. Once you click "Pay" a request to comfirm your M-PESA PIN sent to your phone.</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+
+{% endblock %}
