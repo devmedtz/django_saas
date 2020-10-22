@@ -27,6 +27,7 @@ class CustomUser(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'phone']
 
+
     def has_perm(self, perm, obj=None):
 
         return True
