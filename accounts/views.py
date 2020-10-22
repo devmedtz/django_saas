@@ -61,6 +61,9 @@ def signup(request):
         business = Business(user=user)
         business.save()
 
+        # Create Plan
+        plan = Plan(name="testplan", description="test_description",duration_days=10,price=500.00,max_staff=10,max_branch=4)
+        plan.save()
         # create BusinessTeamMember
         business_team = BusinessTeamMember.objects.get_or_create(
             business=business, user=user)
@@ -69,13 +72,14 @@ def signup(request):
         ends_time = timezone.now() + timedelta(days=14)
 
         subscription = Subscription.objects.get_or_create(
-            plan_id=1,
+            plan=plan,
             business=business,
             start_time=timezone.now(),
             ends_time=ends_time,
             is_active=True,
         )
-
+        # import pdb
+        # pdb.set_trace()
         # send confirmation email
         token = account_activation_token.make_token(user)
         user_id = urlsafe_base64_encode(force_bytes(user.id))
