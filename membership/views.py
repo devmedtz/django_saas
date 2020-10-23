@@ -31,17 +31,14 @@ def get_selected_plan(request):
     plan_type = request.session.get('selected_plan_type')
     host = request.get_host()
 
-
     print(request.session.get('selected_plan_type'))
-    
+
     selected_plan_qs = Plan.objects.filter(
         name=plan_type)
     if selected_plan_qs.exists():
         return selected_plan_qs.first()
 
     return HttpResponse('Session expire')
-
-    
 
 
 class PricingPage(LoginRequiredMixin, ListView):
@@ -75,6 +72,7 @@ class PricingPage(LoginRequiredMixin, ListView):
         request.session['selected_plan_type'] = selected_plan.name
 
         return HttpResponseRedirect(reverse('membership:payment'))
+
 
 @login_required
 def paymentView(request):
@@ -183,7 +181,6 @@ def paymentView(request):
 
             if result is None:
                 raise Exception('API call failed to get result. Please check.')
-
 
             if result.body['output_ResponseCode'] == 'INS-0':
 
