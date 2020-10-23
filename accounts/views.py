@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.core.mail import EmailMessage
 from django.urls import reverse_lazy
 from django.template.loader import get_template
+from django.utils.crypto import get_random_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import TemplateView, FormView, DeleteView
@@ -148,10 +149,9 @@ class CreateStaff(FormView):
             staff_obj.is_manager = False
             staff_obj.created_by = self.request.user
 
-            # Set default password to phone_number
-            # todo: #23 generate random characters
+            # Set default password
             staff_obj.set_password(
-                raw_password=form.cleaned_data['phone']
+                raw_password=get_random_string(length=8)
             )
 
             staff_obj.save()
