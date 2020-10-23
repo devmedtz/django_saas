@@ -257,14 +257,3 @@ class UpdatePassword(FormView):
                            extra_tags='alert alert-danger')
 
         return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
-
-
-class Logout(FormView):
-    form_class = AuthenticationForm
-    template_name = 'accounts/login.html'
-
-    def get(self, request, *args, **kwargs):
-
-        logout(request)
-
-        return redirect(to='accounts:login')
