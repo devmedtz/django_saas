@@ -8,13 +8,17 @@ User = get_user_model()
 
 
 class SignUpForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
+    last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
+    email = forms.CharField(max_length=254, help_text='Required. Inform a valid email address.')
+    phone_number = forms.CharField(max_length=15, required=False, help_text='Optional.')
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(
         label='Password confirmation', widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'phone']
+        fields = ('first_name', 'last_name', 'email','phone_number', 'password1', 'password2', )
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
