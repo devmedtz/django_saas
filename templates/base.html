@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{% static 'assets/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
 
 
@@ -49,7 +49,7 @@
       <a class="btn btn-outline-primary" href="{% url 'accounts:signup' %}">Sign up</a>
       {% endif %}
     </div>
-    
+
     {% block content %}
     {% endblock %}
 
@@ -97,8 +97,8 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="{% static 'assets/dist/js/jquery-3.2.1.slim.mi.js' %}"></script>
-    <script src="{% static 'assets/dist/js/popper.min.js' %}"></script>
-    <script src="{% static 'assets/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static '/js/popper.min.js' %}"></script>
+    <script src="{% static '/js/bootstrap.min.js' %}"></script>
   </body>
 </html>
