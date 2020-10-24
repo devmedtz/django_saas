@@ -74,8 +74,10 @@ def signup(request):
         # create free subscription
         ends_time = timezone.now() + timedelta(days=14)
 
+        plan = Plan.objects.first()
+
         subscription = Subscription.objects.get_or_create(
-            plan_id=1,
+            plan=plan,
             business=business,
             start_time=timezone.now(),
             ends_time=ends_time,
