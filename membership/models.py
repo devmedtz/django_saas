@@ -9,7 +9,7 @@ class Business(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     name = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.user.email
@@ -37,7 +37,7 @@ class Subscription(models.Model):
     start_time = models.DateTimeField()
     ends_time = models.DateTimeField()
     is_active = models.BooleanField(default=False)
-    paid_status = models.BooleanField(default=False) #payment gateway
+    paid_status = models.BooleanField(default=False)  # payment gateway
 
     def __str__(self):
         return self.plan.name
@@ -54,11 +54,14 @@ class BusinessTeamMember(models.Model):
 class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    phone = models.CharField(max_length=12, verbose_name='Enter your M-PESA mobile number', help_text='example. 255700000000')
+    user = models.ForeignKey(
+        User, on_delete=models.PROTECT, blank=True, null=True)
+    phone = models.CharField(
+        max_length=12, verbose_name='Enter your M-PESA mobile number', help_text='example. 255700000000')
     transactionID = models.CharField(max_length=100, blank=True, null=True)
     conversationID = models.CharField(max_length=100, blank=True, null=True)
-    reference_no = models.CharField(max_length=150, blank=True, null=True) #payment gateway
+    reference_no = models.CharField(
+        max_length=150, blank=True, null=True)  # payment gateway
 
     def __str__(self):
         return self.user.business.plan

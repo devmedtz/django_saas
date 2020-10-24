@@ -46,6 +46,10 @@ class Login(LoginView):
             return f'/admin/'
 
 
+def random_name():
+    return get_random_string(length=6)
+
+
 def signup(request):
     form = SignUpForm(request.POST or None)
     if form.is_valid():
@@ -59,7 +63,8 @@ def signup(request):
         profile.save()
 
         # create business
-        business = Business(user=user)
+        # random business created since field is mandatory
+        business = Business(user=user, name=random_name())
         business.save()
 
         # create BusinessTeamMember
@@ -257,14 +262,3 @@ class UpdatePassword(FormView):
                            extra_tags='alert alert-danger')
 
         return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
-
-
-class Logout(FormView):
-    form_class = AuthenticationForm
-    template_name = 'accounts/login.html'
-
-    def get(self, request, *args, **kwargs):
-
-        logout(request)
-
-        return redirect(to='accounts:login')
