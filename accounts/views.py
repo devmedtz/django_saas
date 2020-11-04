@@ -39,9 +39,9 @@ class Login(LoginView):
         if url:
             return url
         elif self.request.user.is_admin:
-            return reverse('membership')
+            return reverse('dashboard')
         elif self.request.user.is_manager or self.request.user.is_staff:
-            return reverse('membership')
+            return reverse('dashboard')
         else:
             return f'/admin/'
 
