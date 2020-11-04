@@ -22,19 +22,11 @@
                     <li>Centre manager</li>
                 </ul>
                 {% if plan.name == 'Free' %}
-                    {% if plan.name != current_plan %}
-                        <a href="{% url 'accounts:signup' %}" class="btn btn-lg btn-block btn-outline-primary">Sign up for free</a>
-                    {% else %}
-                    <small class="text-danger">This is your current plan</small>
-                    {% endif %}
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-lg btn-block btn-outline-primary">Sign up for free</a>
                 {% else %}
                 <form action="" method="POST">
                     {% csrf_token %}
-                    {% if plan.name != current_plan %}
                     <button class="btn btn-lg btn-block btn-primary">Get started</button>
-                    {% else %}
-                    <small class="text-danger">This is your current plan</small>
-                    {% endif %}
                     <input type="hidden" name="plan_id" value="{{plan.id}}">
                 </form>
                 {% endif %}
