@@ -42,6 +42,13 @@ class PricingPage(ListView):
     template_name = 'membership/pricing_page.html'
     model = Plan
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            current_plan = get_user_plan(self.request)
+            context['current_plan'] = str(current_plan.plan)
+        return context
+
     def post(self, request, *args, **kwargs):
         selected_plan_type = request.POST.get('plan_id')
 
