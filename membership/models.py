@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.transaction import TransactionManagementError
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -18,7 +19,7 @@ class Business(models.Model):
 class Plan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, unique=True)
     description = models.TextField()
     duration_days = models.IntegerField(default=14)
     price = models.FloatField(default=0)
@@ -27,6 +28,13 @@ class Plan(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, *args, **kwargs):
+        if kwargs.get("force", False):
+            kwargs.pop("force")
+            super(Plan, self).delete(*args, **kwargs)
+        else:
+            raise TransactionManagementError("Cant't delete Plan objects. On production, set active=False. If you're on development and really want to delete, use object.delete(force=True).")
 
 
 class Subscription(models.Model):

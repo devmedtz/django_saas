@@ -50,6 +50,10 @@ class CustomUser(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    def _send_welcome_mail(self):
+        # send mail here
+	    pass
+
 
 # Profile Picture
 def profile_pic_filename(instance, filename):
