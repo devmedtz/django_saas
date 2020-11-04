@@ -26,12 +26,9 @@ def get_user_plan(request):
 
 
 def get_selected_plan(request):
-    #plan_type = request.session['selected_plan_type']
 
     plan_type = request.session.get('selected_plan_type')
     host = request.get_host()
-
-    print(request.session.get('selected_plan_type'))
 
     selected_plan_qs = Plan.objects.filter(
         name=plan_type)
@@ -41,15 +38,9 @@ def get_selected_plan(request):
     return HttpResponse('Session expire')
 
 
-class PricingPage(LoginRequiredMixin, ListView):
+class PricingPage(ListView):
     template_name = 'membership/pricing_page.html'
     model = Plan
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        current_plan = get_user_plan(self.request)
-        context['current_plan'] = str(current_plan.plan)
-        return context
 
     def post(self, request, *args, **kwargs):
         selected_plan_type = request.POST.get('plan_id')
