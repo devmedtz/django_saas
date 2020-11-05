@@ -1,0 +1,12 @@
+{% extends 'dashboard-base.html' %}
+
+{% block content %}
+
+    <div class='container mt-5'>
+        <form method="post">{% csrf_token %} 
+            <h5>Are you sure you want to delete "{{ object }}"?</h5> 
+            <input class="btn btn-danger mt-2" type="submit" value="Confirm"> 
+        </form> 
+    </div>
+
+{% endblock %}

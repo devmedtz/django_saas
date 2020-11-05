@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+{% block title %} 403 Error Permission denied {% endblock title %}
+
+{% block page_style %}{% endblock page_style %}
+{% block page_js %}{% endblock page_js %}
+
+{% block content %}
+    <div class="alert alert-danger">
+        <h4>
+            <i class="fa fa-exclamation-triangle fa-lg"></i>
+            {% if exception %}
+                {{ exception }}
+            {% else %}
+                Permission denied to access page
+            {% endif %}
+        </h4>
+    </div>
+{% endblock %}

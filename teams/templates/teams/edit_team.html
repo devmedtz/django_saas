@@ -1,0 +1,67 @@
+{% extends 'dashboard-base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Staff{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto">
+
+          <a class="nav-item nav-link" href="{% url 'teams:create-team' %}">
+              <i class="fa fa-plus-circle"></i> Add New
+          </a>
+            <a class="nav-item nav-link" href="{% url 'teams:create-team' %}">
+              <i class="fa fa-list"></i> View
+            </a>
+          <a class="nav-item nav-link" href="{% url 'teams:delete-team' pk=person.pk %}">
+              <i class="fa fa-trash"></i> Delete</a>
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Edit {{ person.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'teams:update-team' pk=person.pk %}" method="post">{% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-info btn-block">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">{{ person.name }} Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive">
+                        <tbody>
+                            <tr><td>Name</td><td>{{ person.name }}</td></tr>
+                            <tr><td>Phone</td><td>{{ person.phone }}</td></tr>
+                            <tr><td>Email</td><td>{{ person.email }}</td></tr>
+                            <tr><td>Last Login</td><td>{{ person.last_login}}</td></tr>
+                            <tr><td>Branch</td><td>{{ person.branch }}</td></tr>
+                        </tbody>
+                    </table>
+                    {% if request.user.is_manager %}
+                        <a href="" class="btn btn-outline-info">
+                            Set Permissions
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

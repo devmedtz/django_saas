@@ -3,10 +3,11 @@
 
 
 {% block content %}
-<div class="container">
-    <h3>You subscribe: {{subscription.plan}} plan </h3>
-    <h3>Remain days: {{remain_days}} days</h3>
-    <a class="btn btn-primary" href="{% url 'membership' %}">Upgrade</a>
-</div>
+
+    <div class="container">
+        <h3>You subscribe: {{subscription.plan}} plan </h3>
+        <h3>Remain days: {{remain_days}} days</h3>
+        <a class="btn btn-primary" href="{% url 'membership' %}">Upgrade</a>
+    </div>
 
 {% endblock %}

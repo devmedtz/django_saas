@@ -1,0 +1,71 @@
+{% extends 'dashboard-base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg context-bar">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto mb-3">
+          
+        </div>
+      </div>
+    </nav>
+
+    {% include 'messages.html' %}
+
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Add New team member</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'teams:create-team' %}" method="post">{% csrf_token %}
+                        {{ form|crispy }}
+                        <span class="text-muted">Password will be generated automatic and sent to Team Member Email Address</span>
+                        <button type="submit" class="btn btn-primary btn-block mt-2">Save</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="">Team members</h5>
+                </div>
+                <div class="card-body">
+                    {% if teams|length > 0 %}
+                        <table class="table table-striped table-bordered table-hover table-condensed">
+                            <thead>
+                                <th>#</th><th>Name</th><th>Phone</th><th>Email</th>
+                            </thead>
+                            <tbody>
+                                {% for team in teams %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}.</td>
+                                        <td>
+                                            <a href="{% url 'teams:update-team' team.pk %}"> {{ team.name }}</a>
+                                        </td>
+                                        <td>{{ team.phone }}</td>
+                                        <td>{{ team.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-info">No staff have been added yet</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
