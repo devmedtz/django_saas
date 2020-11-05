@@ -30,6 +30,7 @@ else:
 
 INSTALLED_APPS = [
     'accounts',
+    'teams',
     'membership',
 
     'django.contrib.admin',

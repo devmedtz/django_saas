@@ -11,10 +11,5 @@ urlpatterns = [
     path('login/', views.Login.as_view(), name='login'),
     path('confirm-email/<str:user_id>/<str:token>/',
          views.ConfirmRegistrationView.as_view(), name='confirm-email'),
-    path('create-staff/', views.CreateStaff.as_view(), name='create-staff'),
-    path('update-staff/<int:pk>/', views.UpdateStaff.as_view(), name='update-staff'),
-    path('update-password/<int:pk>/',
-         views.UpdatePassword.as_view(), name='update-password'),
-    path('delete-staff/<int:pk>/', views.DeleteStaff.as_view(), name='delete-staff'),
     path('', include('django.contrib.auth.urls')),
 ]

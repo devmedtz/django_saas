@@ -9,8 +9,7 @@ from django.template.loader import get_template
 from django.utils.crypto import get_random_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.views.generic import TemplateView, FormView, DeleteView
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth import authenticate, login, logout
@@ -40,7 +39,7 @@ class Login(LoginView):
             return url
         elif self.request.user.is_admin:
             return reverse('dashboard')
-        elif self.request.user.is_manager or self.request.user.is_staff:
+        elif self.request.user.is_manager or self.request.user.is_team:
             return reverse('dashboard')
         else:
             return f'/admin/'
@@ -129,138 +128,3 @@ class ConfirmRegistrationView(TemplateView):
         return render(request, 'accounts/registration_complete.html', context)
 
 
-class CreateStaff(FormView):
-    template_name = 'accounts/create_staff.html'
-    form_class = CreateStaffForm
-
-    def get(self, request, *args, **kwargs):
-
-        staffs = User.objects.filter(
-            is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
-
-        context = {
-            'form': self.form_class,
-            'staffs': staffs
-        }
-
-        return render(request, self.template_name, context=context)
-
-    def post(self, request, *args, **kwargs):
-
-        form = self.form_class(data=request.POST)
-
-        if form.is_valid():
-
-            staff_obj = form.save(commit=False)
-            staff_obj.is_staff = True
-            staff_obj.is_manager = False
-            staff_obj.created_by = self.request.user
-
-            # Set default password
-            staff_obj.set_password(
-                raw_password=get_random_string(length=8)
-            )
-
-            staff_obj.save()
-
-            messages.success(request, 'Success, staff created',
-                             extra_tags='alert alert-success')
-
-            return redirect(to='accounts:home')
-
-        staffs = User.objects.filter(
-            is_staff=True, created_by=self.request.user).order_by('-pk')[:10]
-
-        context = {
-            'form': form,
-            'staffs': staffs
-        }
-
-        messages.error(request, 'Errors occurred',
-                       extra_tags='alert alert-danger')
-
-        return render(request, self.template_name, context=context)
-
-
-class UpdateStaff(FormView):
-    template_name = 'accounts/edit_staff.html'
-    form_class = UpdateStaffForm
-    password_form = PasswordChangeForm
-
-    def post(self, request, *args, **kwargs):
-
-        person = get_object_or_404(User, pk=self.kwargs['pk'])
-
-        form = self.form_class(instance=person, data=request.POST)
-
-        if form.is_valid():
-
-            form.save()
-
-            messages.success(
-                request, 'Success, staff details updated', extra_tags='alert alert-success')
-
-            return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
-        else:
-
-            context = {
-                'form': self.form_class(data=request.POST, instance=person),
-                'person': person,
-                'password_form': self.password_form
-            }
-
-            messages.error(request, 'Failed, errors occurred.',
-                           extra_tags='alert alert-danger')
-
-            return render(request, self.template_name, context=context)
-
-    def get(self, request, *args, **kwargs):
-
-        person = get_object_or_404(User, pk=self.kwargs['pk'])
-
-        password_form = self.password_form(user=person)
-
-        password_form.fields['old_password'].widget.attrs.pop(
-            "autofocus", None)
-
-        context = {
-            'form': self.form_class(instance=person),
-            'person': person,
-            'password_form': password_form
-        }
-
-        return render(request, self.template_name, context=context)
-
-
-class DeleteStaff(DeleteView):
-
-    model = User
-
-    def get_success_url(self):
-
-        messages.success(self.request, 'Success, staff deleted',
-                         extra_tags='alert alert-info')
-
-        return reverse_lazy('accounts:home')
-
-
-class UpdatePassword(FormView):
-    form_class = PasswordChangeForm
-
-    def post(self, request, *args, **kwargs):
-
-        staff = get_object_or_404(User, pk=self.kwargs['pk'])
-
-        form = self.form_class(user=staff, data=request.POST)
-
-        if form.is_valid():
-
-            form.save()
-
-            messages.success(request, 'Success, password updated',
-                             extra_tags='alert alert-success')
-        else:
-            messages.error(request, 'Failed, password NOT updated',
-                           extra_tags='alert alert-danger')
-
-        return redirect(to='accounts:update-staff', pk=self.kwargs['pk'])
