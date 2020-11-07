@@ -27,8 +27,6 @@ from membership.models import Business, BusinessTeamMember, Subscription, Plan
 
 User = get_user_model()
 
-BASE_URL = 'http://127.0.0.1:8000'
-
 
 class Login(LoginView):
     template_name = 'accounts/login.html'
@@ -84,20 +82,7 @@ def signup(request):
         )
 
         # send confirmation email
-        token = account_activation_token.make_token(user)
-        user_id = urlsafe_base64_encode(force_bytes(user.id))
-        url = BASE_URL + reverse('accounts:confirm-email',
-                                 kwargs={'user_id': user_id, 'token': token})
-        message = get_template(
-            'accounts/account_activation_email.html').render(
-            {'confirm_url': url})
-        mail = EmailMessage(
-            'Account Confirmation',
-            message,
-            to=[user_email],
-            from_email=settings.EMAIL_HOST_USER)
-        mail.content_subtype = 'html'
-        mail.send()
+        form.send_confirmation_email(user)
 
         return render(request, 'accounts/registration_pending.html',
                       {'message': (
@@ -123,8 +108,21 @@ class ConfirmRegistrationView(TemplateView):
         if user and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            context['message'] = 'Registration complete. Please login'
+            if user.is_team:
+                # send login credentials
+                message = get_template(
+                    'teams/login_credentials_email.html').render({
+                        'email': f'{user.email}',
+                        'password': f'{user.password}',
+                    })
+                mail = EmailMessage(
+                    'Login credentials',
+                    message,
+                    to=[user.email],
+                    from_email=settings.EMAIL_HOST_USER)
+                mail.content_subtype = 'html'
+                mail.send()
+            else:
+                context['message'] = 'Registration complete. Please login'
 
         return render(request, 'accounts/registration_complete.html', context)
-
-
