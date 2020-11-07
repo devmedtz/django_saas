@@ -37,6 +37,11 @@ def get_selected_plan(request):
 
     return HttpResponse('Session expire')
 
+def has_expire(request):
+    sub = Subscription.objects.get(business=request.user.business)
+
+    return sub.ends_time < timezone.now()
+
 
 class PricingPage(ListView):
     template_name = 'membership/pricing_page.html'
@@ -53,6 +58,9 @@ class PricingPage(ListView):
         selected_plan_type = request.POST.get('plan_id')
 
         user_subscription = get_user_plan(request)
+
+        has_expired = has_expire(request)
+        print('has_expire:', has_expired)
 
         selected_plan_qs = Plan.objects.filter(
             id=selected_plan_type)
@@ -85,7 +93,6 @@ def paymentView(request):
     reference_no = str(request.user.id) + str(current_subscription.id) + \
         datetime.now().strftime('%Y%m%d%H%M%S')
 
-    print('reference_no:', reference_no)
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -150,7 +157,15 @@ def paymentView(request):
             api_context.add_header('Origin', '*')
 
             # Input Variables
-            amount = plans.price
+            has_expired = has_expire(request)
+            selected_price = plans.price
+            current_price = current_subscription.plan.price
+            
+            if plans.id != 1 and has_expired == False and selected_price > current_price:
+                amount = selected_price - current_price
+            else:
+                amount = selected_price
+
             phone = request.POST.get('phone')
             desc = plans.name
 
@@ -182,14 +197,27 @@ def paymentView(request):
 
             if result.body['output_ResponseCode'] == 'INS-0':
 
-                # update/downgrade subscriptions
-                ends_time = timezone.now() + timedelta(days=plans.duration_days)
+                #Update/downgrade subscriptions - New Plan/Existing plan.
+                ends_times = timezone.now() + timedelta(days=plans.duration_days)
+
+                if plans.id != 1 and has_expired == False and selected_price > current_price:
+                    start_times = current_subscription.start_time
+                    ends_time = current_subscription.ends_time
+
+                else:
+                    start_times = timezone.now()
+                    ends_time = ends_times
+
+                print('start_times:', start_times)
+                print('ends_time:', ends_time)
+
                 Subscription.objects.filter(business=request.user.business).update(
                     plan=plans.id,
-                    start_time=timezone.now(),
+                    start_time=start_times,
                     ends_time=ends_time,
                     paid_status=True,
                 )
+
 
                 # save transactionID,transactionID
                 payment = form.save(commit=False)

@@ -48,7 +48,8 @@ class Dashboard(SubscriptionView, TemplateView):
         sub = Subscription.objects.get(business=self.request.user.businessteammember.business)
         remain_days = sub.ends_time - timezone.now()
         context['subscription'] = sub
-        context['remain_days'] = remain_days.days
+        #context['remain_days'] = remain_days.days
+        context['remain_days'] = remain_days
         return context
 
     template_name = 'dashboard.html'
