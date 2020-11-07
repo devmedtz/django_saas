@@ -10,7 +10,9 @@ class Business(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     name = models.CharField(max_length=100)
-    location = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=100)
+    business_type = models.CharField(max_length=150)
+    website = models.URLField(blank=True)
 
     def __str__(self):
         return self.user.email

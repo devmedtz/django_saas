@@ -2,7 +2,7 @@ import re
 
 from django import forms
 
-from .models import Payment
+from .models import Payment, Business
 
 
 class PaymentForm(forms.ModelForm):
@@ -19,3 +19,10 @@ class PaymentForm(forms.ModelForm):
             raise forms.ValidationError(
                 "Phone number must in format 2557xxxxxxxx")
         return phone
+
+
+class BusinessForm(forms.ModelForm):
+
+    class Meta:
+        model = Business
+        fields = ['name', 'location', ]

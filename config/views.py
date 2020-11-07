@@ -2,7 +2,8 @@ import datetime
 from datetime import datetime
 from django.utils import timezone
 from datetime import datetime, timedelta, date
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import render, redirect, reverse
 from django.views.generic import TemplateView, View
 from membership.models import Subscription, BusinessTeamMember
 
@@ -41,7 +42,7 @@ class SubscriptionView(BusinessView):
 	    return ret
 
     
-class Dashboard(SubscriptionView, TemplateView):
+class Dashboard(LoginRequiredMixin, UserPassesTestMixin, SubscriptionView, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,3 +54,10 @@ class Dashboard(SubscriptionView, TemplateView):
         return context
 
     template_name = 'dashboard.html'
+
+    def test_func(self):
+        if self.request.user.business.location != '':
+            return True
+
+    def handle_no_permission(self):
+        return redirect(reverse('membership:update-business', kwargs={'pk': self.request.user.business.id}))

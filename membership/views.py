@@ -1,12 +1,12 @@
 from datetime import datetime
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
-from django.urls import reverse
-from django.views.generic import TemplateView, ListView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import TemplateView, ListView, UpdateView
 from django.contrib import messages
 from .models import Plan, Subscription, Business
-from .forms import PaymentForm
+from .forms import PaymentForm, BusinessForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 
@@ -258,3 +258,12 @@ def paymentView(request):
     context = {'form': form, 'plans': plans, 'reference_no': reference_no}
 
     return render(request, 'membership/payment.html', context)
+
+
+
+class BusinessUpdateView(UpdateView):
+    model = Business
+    fields = ['name', 'location', 'business_type', 'website', ]
+    template_name = 'membership/business_update.html'
+    success_url = reverse_lazy('dashboard')
+
