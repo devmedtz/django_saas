@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime 
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
@@ -9,6 +9,8 @@ from .models import Plan, Subscription, Business
 from .forms import PaymentForm, BusinessForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
+from django.template.loader import get_template
 
 # Vodacom mpesa intergrations
 from django.conf import settings
@@ -226,6 +228,24 @@ def paymentView(request):
                 payment.conversationID = result.body['output_ConversationID']
                 payment.reference_no = reference_no
                 payment.save()
+
+                #send Email for Payment confirmations
+                user_email = request.user.email
+                email_sub = Subscription.objects.get(business=request.user.business)
+                message = get_template(
+                'membership/payment_comfirmation_email.html').render(
+                {
+                    'user_email': user_email,
+                    'sub':email_sub,
+                    'amount':amount,
+                    })
+                mail = EmailMessage(
+                'Payment Confirmations',
+                message,
+                to=[user_email],
+                from_email=settings.EMAIL_HOST_USER)
+                mail.content_subtype = 'html'
+                mail.send()
 
                 return HttpResponse('Your Payment was Successfully sent!')
 
