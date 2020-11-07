@@ -39,7 +39,12 @@ class Login(LoginView):
             return url
         elif self.request.user.is_admin:
             return reverse('dashboard')
-        elif self.request.user.is_manager or self.request.user.is_team:
+        elif self.request.user.is_manager:
+            if self.request.user.business.location == '':
+                return reverse('membership:update-business', kwargs={'pk': self.request.user.business.id})
+            else:
+                return reverse('dashboard')
+        elif self.request.user.is_team:
             return reverse('dashboard')
         else:
             return f'/admin/'
