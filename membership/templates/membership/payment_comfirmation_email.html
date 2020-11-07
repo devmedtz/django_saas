@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Payment Confirmations - Django Saas</title>
+</head>
+
+
+<body>
+    <h2>Payment Confirmations</h2>
+    <p>
+        Please store this email as receipt 
+    </p>
+    <p>
+        <p>Plan name: {{sub.plan.name}}</p>
+        <p>Start time: {{sub.start_time}}</p>
+        <p>End_time: {{sub.ends_time}}</p>
+        <p>Amount Paid: {{amount}}</p>
+    </p>
+</body>
+</html>

@@ -24,9 +24,9 @@
                 {% if request.user.is_authenticated %}
                     {% if plan.name == 'Free' %}
                         {% if plan.name != current_plan %}
-                        <small class="text-danger">You can not subscribe to free plan</small>
+                        <small class="text-warning">You can not subscribe to free plan</small>
                         {% else %}
-                        <small class="text-danger">This is your current plan</small>
+                        <small class="text-success">This is your current plan</small>
                         {% endif %}
                     {% else %}
                         <form action="" method="POST">
@@ -34,7 +34,7 @@
                             {% if plan.name != current_plan %}
                             <button class="btn btn-lg btn-block btn-primary">Buy Now</button>
                             {% else %}
-                            <small class="text-danger">This is your current plan</small>
+                            <small class="text-success">This is your current plan</small>
                             {% endif %}
                             <input type="hidden" name="plan_id" value="{{plan.id}}">
                         </form>
