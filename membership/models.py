@@ -48,7 +48,7 @@ class Subscription(models.Model):
     paid_status = models.BooleanField(default=False)  # payment gateway
 
     def __str__(self):
-        return self.plan.name
+        return self.business.name
 
 
 class BusinessTeamMember(models.Model):
@@ -72,4 +72,4 @@ class Payment(models.Model):
         max_length=150, blank=True, null=True)  # payment gateway
 
     def __str__(self):
-        return self.user.business.plan
+        return self.user.business.name

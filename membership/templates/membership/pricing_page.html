@@ -24,7 +24,7 @@
                 {% if request.user.is_authenticated %}
                     {% if plan.name == 'Free' %}
                         {% if plan.name != current_plan %}
-                            <a href="{% url 'accounts:signup' %}" class="btn btn-lg btn-block btn-outline-primary">Sign up for free</a>
+                        <small class="text-danger">You can not subscribe to free plan</small>
                         {% else %}
                         <small class="text-danger">This is your current plan</small>
                         {% endif %}
