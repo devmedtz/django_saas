@@ -9,7 +9,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ml-auto mb-3">
-          
+
         </div>
       </div>
     </nav>
@@ -41,7 +41,11 @@
                     {% if teams|length > 0 %}
                         <table class="table table-striped table-bordered table-hover table-condensed">
                             <thead>
-                                <th>#</th><th>Name</th><th>Phone</th><th>Email</th>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Active</th>
                             </thead>
                             <tbody>
                                 {% for team in teams %}
@@ -52,6 +56,7 @@
                                         </td>
                                         <td>{{ team.phone }}</td>
                                         <td>{{ team.email }}</td>
+                                        <td>{{ team.is_active | yesno | capfirst }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

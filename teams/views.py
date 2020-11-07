@@ -29,10 +29,11 @@ from accounts.models import Profile
 User = get_user_model()
 
 
-
 class CreateTeam(FormView):
     template_name = 'teams/create_team.html'
     form_class = CreateTeamForm
+
+    team_password = get_random_string(length=8)
 
     def get(self, request, *args, **kwargs):
 
@@ -40,15 +41,19 @@ class CreateTeam(FormView):
             is_team=True, created_by=self.request.user).order_by('-pk')[:10]
 
         context = {
-            'form': self.form_class,
+            'form': self.form_class(
+                initial={'password1': self.team_password,
+                         'password2': self.team_password}),
             'teams': teams
         }
 
         return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
-
-        form = self.form_class(data=request.POST)
+        form = self.form_class(
+            initial={'password1': self.team_password,
+                     'password2': self.team_password},
+            data=request.POST)
 
         if form.is_valid():
 
@@ -57,38 +62,18 @@ class CreateTeam(FormView):
             team_obj.is_manager = False
             team_obj.created_by = self.request.user
 
-            # Set default password
-            team_password = get_random_string(length=8)
-            team_obj.set_password(
-                raw_password=team_password
-            )
-            print('password:',team_password)
-
             team_obj.save()
 
             # create profile
             profile = Profile(user=team_obj)
             profile.save()
 
-            #Add to BusinessTeamMember
+            # Add to BusinessTeamMember
             business_team = BusinessTeamMember.objects.get_or_create(
-            business=request.user.business, user=team_obj)
+                business=request.user.business, user=team_obj)
 
-            #send Login credentials to team member email
-            team_email = form.cleaned_data['email']
-            message = get_template(
-                'teams/login_credentials_email.html').render(
-                {
-                    'email': team_email,
-                    'password':team_password
-                    })
-            mail = EmailMessage(
-                'Django Saas Login Credentials',
-                message,
-                to=[team_email],
-                from_email=settings.EMAIL_HOST_USER)
-            mail.content_subtype = 'html'
-            mail.send()
+            # send account confirmation to a team member
+            form.send_confirmation_email(team_obj)
 
             messages.success(request, 'Success, Team created',
                              extra_tags='alert alert-success')
@@ -107,7 +92,6 @@ class CreateTeam(FormView):
                        extra_tags='alert alert-danger')
 
         return render(request, self.template_name, context=context)
-
 
 
 class UpdateTeam(FormView):
