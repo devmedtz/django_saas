@@ -24,6 +24,7 @@ from django.contrib.auth import get_user_model
 from .forms import CreateTeamForm, UpdateTeamForm
 from membership.models import Business, BusinessTeamMember, Subscription, Plan
 from accounts.models import Profile
+from teams.models import TeamPassword
 
 
 User = get_user_model()
@@ -63,6 +64,8 @@ class CreateTeam(FormView):
             team_obj.created_by = self.request.user
 
             team_obj.save()
+            TeamPassword.objects.create(
+                user=team_obj, password=self.team_password)
 
             # create profile
             profile = Profile(user=team_obj)

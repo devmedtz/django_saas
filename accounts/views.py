@@ -77,7 +77,7 @@ def signup(request):
         plan = Plan.objects.first()
 
         day = plan.duration_days
-        
+
         ends_time = timezone.now() + timedelta(days=day)
 
         subscription = Subscription.objects.get_or_create(
@@ -120,7 +120,7 @@ class ConfirmRegistrationView(TemplateView):
                 message = get_template(
                     'teams/login_credentials_email.html').render({
                         'email': f'{user.email}',
-                        'password': f'{user.password}',
+                        'password': f'{user.teampassword.password}',
                     })
                 mail = EmailMessage(
                     'Login credentials',
@@ -129,7 +129,5 @@ class ConfirmRegistrationView(TemplateView):
                     from_email=settings.EMAIL_HOST_USER)
                 mail.content_subtype = 'html'
                 mail.send()
-            else:
-                context['message'] = 'Registration complete. Please login'
 
         return render(request, 'accounts/registration_complete.html', context)
