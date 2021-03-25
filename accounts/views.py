@@ -69,6 +69,9 @@ def signup(request):
         business = Business(user=user, name=random_name())
         business.save()
 
+        # Create Plan
+        plan = Plan(name="testplan", description="test_description",duration_days=10,price=500.00,max_staff=10,max_branch=4)
+        plan.save()
         # create BusinessTeamMember
         business_team = BusinessTeamMember.objects.get_or_create(
             business=business, user=user)
@@ -87,7 +90,8 @@ def signup(request):
             ends_time=ends_time,
             is_active=True,
         )
-
+        # import pdb
+        # pdb.set_trace()
         # send confirmation email
         form.send_confirmation_email(user)
 
