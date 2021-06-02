@@ -8,7 +8,7 @@ chardet==3.0.4
 idna==2.6
 pycryptodome
 requests>=2.20.0
-urllib3==1.25.10
+urllib3==1.26.5
 django-decouple==2.1
 unipath==1.1
 dj-database-url==0.5.0
